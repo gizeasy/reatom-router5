@@ -1,0 +1,19 @@
+{
+  "name": "reatom-router5",
+  "version": "0.1.0",
+  "main": "src/plugin.js",
+  "typings": "src/plugin.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "gizeasy",
+  "dependencies": {
+    "@reatom/core": "^1.1.5",
+    "router5": "^8.0.1",
+    "tslib": "^1.13.0"
+  },
+  "devDependencies": {
+    "prettier": "^1.18.2",
+    "typescript": "^3.6.4"
+  }
+}
