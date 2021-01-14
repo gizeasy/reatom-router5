@@ -59,6 +59,7 @@ exports.routerAtom = core_1.declareAtom(initialState, function (on) { return [
 ]; });
 function subscribe(store, router) {
     router.usePlugin(exports.plugin(store.dispatch));
+    router.setDependency('store', store);
     store.subscribe(function (action) {
         var navigateToType = exports.navigateToAction.getType();
         var cancelTransitionType = exports.cancelTransitionAction.getType();

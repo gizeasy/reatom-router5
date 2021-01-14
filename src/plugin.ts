@@ -107,6 +107,7 @@ export const routerAtom = declareAtom(initialState, (on) => [
 
 export function subscribe(store: Store, router: Router) {
   router.usePlugin(plugin(store.dispatch));
+  router.setDependency('store',store);
   store.subscribe((action) => {
     const navigateToType = navigateToAction.getType();
     const cancelTransitionType = cancelTransitionAction.getType();
