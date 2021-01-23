@@ -3,17 +3,24 @@ exports.__esModule = true;
 exports.subscribe = exports.routerAtom = exports.plugin = exports.clearErrorsAction = exports.canActivateAction = exports.canDeactivateAction = exports.cancelTransitionAction = exports.navigateToAction = exports.transitionSuccessAction = exports.transitionErrorAction = exports.transitionCancelAction = exports.transitionStartAction = void 0;
 var tslib_1 = require("tslib");
 var core_1 = require("@reatom/core");
-var startAction = core_1.declareAction();
-var stopAction = core_1.declareAction();
-exports.transitionStartAction = core_1.declareAction();
-exports.transitionCancelAction = core_1.declareAction();
-exports.transitionErrorAction = core_1.declareAction();
-exports.transitionSuccessAction = core_1.declareAction();
-exports.navigateToAction = core_1.declareAction();
-exports.cancelTransitionAction = core_1.declareAction();
-exports.canDeactivateAction = core_1.declareAction();
-exports.canActivateAction = core_1.declareAction();
-exports.clearErrorsAction = core_1.declareAction();
+var moduleName = 'router';
+var getName = function (name) {
+    if (!name) {
+        return moduleName;
+    }
+    return moduleName + "/" + name;
+};
+var startAction = core_1.declareAction(getName('start'));
+var stopAction = core_1.declareAction(getName('stop'));
+exports.transitionStartAction = core_1.declareAction(getName('transitionStart'));
+exports.transitionCancelAction = core_1.declareAction(getName('transitionCancel'));
+exports.transitionErrorAction = core_1.declareAction(getName('transitionError'));
+exports.transitionSuccessAction = core_1.declareAction(getName('transitionSuccess'));
+exports.navigateToAction = core_1.declareAction(getName('navigateTo'));
+exports.cancelTransitionAction = core_1.declareAction(getName('cancelTransition'));
+exports.canDeactivateAction = core_1.declareAction(getName('canDeactivate'));
+exports.canActivateAction = core_1.declareAction(getName('canActivate'));
+exports.clearErrorsAction = core_1.declareAction(getName('clearErrors'));
 var initialState = {
     route: null,
     previousRoute: undefined,
@@ -42,7 +49,7 @@ exports.plugin = function (dispatch) {
         }
     }); };
 };
-exports.routerAtom = core_1.declareAtom(initialState, function (on) { return [
+exports.routerAtom = core_1.declareAtom(getName(), initialState, function (on) { return [
     on(exports.transitionStartAction, function (state, _a) {
         var toState = _a.toState;
         return (tslib_1.__assign(tslib_1.__assign({}, state), { transitionRoute: toState, transitionError: undefined }));

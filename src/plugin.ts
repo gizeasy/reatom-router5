@@ -38,17 +38,26 @@ type CanActivateProps = {
   canActivate: boolean;
 };
 
-const startAction = declareAction();
-const stopAction = declareAction();
-export const transitionStartAction = declareAction<RouterActionProp>();
-export const transitionCancelAction = declareAction<RouterActionProp>();
-export const transitionErrorAction = declareAction<RouterActionProp>();
-export const transitionSuccessAction = declareAction<RouterActionProp>();
-export const navigateToAction = declareAction<NavigationToProps>();
-export const cancelTransitionAction = declareAction();
-export const canDeactivateAction = declareAction();
-export const canActivateAction = declareAction();
-export const clearErrorsAction = declareAction();
+const moduleName = 'router';
+
+const getName = (name?: string) => {
+  if(!name){
+    return moduleName;
+  }
+  return `${moduleName}/${name}`
+}
+
+const startAction = declareAction(getName('start'));
+const stopAction = declareAction(getName('stop'));
+export const transitionStartAction = declareAction<RouterActionProp>(getName('transitionStart'));
+export const transitionCancelAction = declareAction<RouterActionProp>(getName('transitionCancel'));
+export const transitionErrorAction = declareAction<RouterActionProp>(getName('transitionError'));
+export const transitionSuccessAction = declareAction<RouterActionProp>(getName('transitionSuccess'));
+export const navigateToAction = declareAction<NavigationToProps>(getName('navigateTo'));
+export const cancelTransitionAction = declareAction(getName('cancelTransition'));
+export const canDeactivateAction = declareAction(getName('canDeactivate'));
+export const canActivateAction = declareAction(getName('canActivate'));
+export const clearErrorsAction = declareAction(getName('clearErrors'));
 
 const initialState: State = {
   route: null,
@@ -80,7 +89,7 @@ export const plugin = (dispatch: Store["dispatch"]) => {
   });
 };
 
-export const routerAtom = declareAtom(initialState, (on) => [
+export const routerAtom = declareAtom(getName(),initialState, (on) => [
   on(transitionStartAction, (state, { toState }) => ({
     ...state,
     transitionRoute: toState,

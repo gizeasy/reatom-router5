@@ -1,6 +1,6 @@
 {
   "name": "reatom-router5",
-  "version": "1.0.0",
+  "version": "0.1.6",
   "main": "src/plugin.js",
   "typings": "src/plugin.d.ts",
   "scripts": {
