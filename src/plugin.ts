@@ -29,12 +29,12 @@ type NavigationToProps = {
 };
 
 type CanDeactivateProps = {
-  name: "string";
+  name: string;
   canDeactivate: boolean;
 };
 
 type CanActivateProps = {
-  name: "string";
+  name: string;
   canActivate: boolean;
 };
 
