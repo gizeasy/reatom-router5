@@ -1,19 +1,36 @@
 {
   "name": "reatom-router5",
-  "version": "0.1.7",
-  "main": "src/plugin.js",
-  "typings": "src/plugin.d.ts",
+  "version": "3.0.1",
+  "main": "plugin.js",
+  "typing": "plugin.d.ts",
+  "homepage": "https://github.com/gizeasy/reatom-router5",
   "scripts": {
-    "build": "tsc"
+    "build:types": "NODE_ENV=buildProduction ttsc --declaration --outDir dist --emitDeclarationOnly -p tsconfig.json",
+    "build:js": "NODE_ENV=buildProduction BUILDING_JS=true babel --extensions '.ts,.tsx' --config-file ./babel.config.js --source-maps --out-dir dist ./src",
+    "build:package.json": "node scripts/prepare-package-json.js",
+    "build:readme.md": "node scripts/copy-readme.js",
+    "build": "rm -rf ./dist && yarn build:js && yarn build:types && yarn build:package.json && yarn build:readme.md"
   },
   "author": "gizeasy",
-  "dependencies": {
-    "@reatom/core": "^1.1.5",
-    "router5": "^8.0.1",
-    "tslib": "^1.13.0"
+  "peerDependencies": {
+    "@reatom/core": "^3.1.6",
+    "router5": "^8.0.1"
   },
   "devDependencies": {
-    "prettier": "^1.18.2",
-    "typescript": "^3.6.4"
+    "@babel/cli": "^7.18.9",
+    "@babel/core": "^7.17.9",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.7",
+    "@babel/plugin-proposal-optional-chaining": "^7.16.7",
+    "@babel/plugin-transform-runtime": "^7.17.0",
+    "@babel/preset-env": "^7.18.9",
+    "@babel/preset-typescript": "^7.18.6",
+    "@reatom/core": "^3.1.6",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "babel-preset-minify": "^0.5.2",
+    "fs": "^0.0.1-security",
+    "prettier": "^2.7.1",
+    "router5": "^8.0.1",
+    "ttypescript": "^1.5.13",
+    "typescript": "^4.9.3"
   }
 }

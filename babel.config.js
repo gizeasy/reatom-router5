@@ -1,0 +1,65 @@
+const isProduction = process.env.NODE_ENV === 'buildProduction';
+const isTest = process.env.NODE_ENV === 'test';
+
+module.exports = {
+  comments: false,
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        // Allow importing core-js in entrypoint and use browserlist to select polyfills
+        useBuiltIns: 'entry',
+        // Set the corejs version we are using to avoid warnings in console
+        // This will need to change once we upgrade to corejs@3
+        corejs: 3,
+        // Transform modules to CJS only for jest
+        modules: isTest ? 'cjs' : false,
+        // Exclude transforms that make all code slower
+        exclude: ['transform-typeof-symbol'],
+      },
+    ],
+    ['@babel/preset-typescript'],
+    ...(isProduction
+      ? [
+          [
+            'minify',
+            {
+              builtIns: false,
+            },
+          ],
+        ]
+      : []),
+  ],
+  plugins: [
+    ['@babel/plugin-proposal-class-properties'],
+    [
+      '@babel/plugin-proposal-object-rest-spread',
+      {
+        useBuiltIns: true,
+      },
+    ],
+    // Polyfills the runtime needed for async/await, generators, and friends
+    // https://babeljs.io/docs/en/babel-plugin-transform-runtime
+    [
+      '@babel/plugin-transform-runtime',
+      {
+        corejs: false,
+        helpers: true,
+        regenerator: true,
+      },
+    ],
+    ...(isProduction
+      ? [
+          [
+            'babel-plugin-module-resolver',
+            {
+              root: ['./'],
+              alias: {
+                '##': './src',
+              },
+            },
+          ],
+        ]
+      : []),
+  ],
+};
