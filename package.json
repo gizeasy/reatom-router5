@@ -1,6 +1,6 @@
 {
   "name": "reatom-router5",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "main": "plugin.js",
   "typing": "plugin.d.ts",
   "homepage": "https://github.com/gizeasy/reatom-router5",
