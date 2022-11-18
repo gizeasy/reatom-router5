@@ -1,19 +1,22 @@
-import { declareAction, declareAtom, Store, Action } from "@reatom/core";
-
+import { action, atom, Ctx } from '@reatom/core';
 import {
-  State as StateRouter5,
   Plugin,
-  Router,
+  State as StateRouter5,
+  PluginFactory,
   NavigationOptions,
-} from "router5";
-
-export type StateRoute = (StateRouter5 & Record<string, any>) | null;
+} from 'router5';
 
 export type State = {
-  route?: StateRoute;
+  route?: StateRouter5;
   previousRoute?: StateRouter5;
   transitionRoute?: StateRouter5;
   transitionError?: string;
+};
+
+export type NavigationToProps = {
+  name: string;
+  params?: Record<string, any>;
+  opts?: NavigationOptions;
 };
 
 type RouterActionProp = {
@@ -22,135 +25,70 @@ type RouterActionProp = {
   err?: string;
 };
 
-type NavigationToProps = {
-  name: string;
-  params?: any;
-  opts?: NavigationOptions;
-};
-
-type CanDeactivateProps = {
-  name: string;
-  canDeactivate: boolean;
-};
-
-type CanActivateProps = {
-  name: string;
-  canActivate: boolean;
-};
-
-const moduleName = 'router';
-
-const getName = (name?: string) => {
-  if(!name){
-    return moduleName;
-  }
-  return `${moduleName}/${name}`
-}
-
-const startAction = declareAction(getName('start'));
-const stopAction = declareAction(getName('stop'));
-export const transitionStartAction = declareAction<RouterActionProp>(getName('transitionStart'));
-export const transitionCancelAction = declareAction<RouterActionProp>(getName('transitionCancel'));
-export const transitionErrorAction = declareAction<RouterActionProp>(getName('transitionError'));
-export const transitionSuccessAction = declareAction<RouterActionProp>(getName('transitionSuccess'));
-export const navigateToAction = declareAction<NavigationToProps>(getName('navigateTo'));
-export const cancelTransitionAction = declareAction(getName('cancelTransition'));
-export const canDeactivateAction = declareAction(getName('canDeactivate'));
-export const canActivateAction = declareAction(getName('canActivate'));
-export const clearErrorsAction = declareAction(getName('clearErrors'));
-
 const initialState: State = {
-  route: null,
+  route: undefined,
   previousRoute: undefined,
   transitionRoute: undefined,
   transitionError: undefined,
 };
 
-export const plugin = (dispatch: Store["dispatch"]) => {
-  return (): Plugin => ({
-    onStart() {
-      dispatch(startAction());
-    },
-    onStop() {
-      dispatch(stopAction());
-    },
-    onTransitionStart(toState, fromState) {
-      dispatch(transitionStartAction({ toState, fromState }));
-    },
-    onTransitionCancel(toState, fromState) {
-      dispatch(transitionCancelAction({ toState, fromState }));
-    },
-    onTransitionSuccess(toState, fromState) {
-      dispatch(transitionSuccessAction({ toState, fromState }));
-    },
-    onTransitionError(toState, fromState, err) {
-      dispatch(transitionErrorAction({ toState, fromState, err }));
-    },
-  });
+const moduleName = 'router';
+
+export const routerAtom = atom<State>(initialState, moduleName);
+
+export const atomNaming = (name: string) => {
+  return `${moduleName}.${name}`;
 };
 
-export const routerAtom = declareAtom(getName(),initialState, (on) => [
-  on(transitionStartAction, (state, { toState }) => ({
-    ...state,
-    transitionRoute: toState,
+const transitionStartAction = action((ctx, payload: RouterActionProp) => {
+  routerAtom(ctx, {
+    ...ctx.get(routerAtom),
+    transitionRoute: payload.toState,
     transitionError: undefined,
-  })),
-  on(transitionSuccessAction, (state, { toState, fromState }) => ({
-    ...state,
-    route: toState,
-    transitionRoute: undefined,
-    transitionError: undefined,
-    previousRoute: fromState,
-  })),
-  on(transitionErrorAction, (state, { toState, err }) => ({
-    ...state,
-    transitionRoute: toState,
-    transitionError: err,
-  })),
-  on(clearErrorsAction, (state) => ({
-    ...state,
-    transitionRoute: undefined,
-    transitionError: undefined,
-  })),
-]);
-
-export function subscribe(store: Store, router: Router) {
-  router.usePlugin(plugin(store.dispatch));
-  router.setDependency('store',store);
-  store.subscribe((action) => {
-    const navigateToType = navigateToAction.getType();
-    const cancelTransitionType = cancelTransitionAction.getType();
-    const canDeactivateType = canDeactivateAction.getType();
-    const canActivateType = canActivateAction.getType();
-
-    switch (action.type) {
-      case navigateToType:
-        const actionNavigateTo = action as Action<NavigationToProps>;
-        router.navigate(
-          actionNavigateTo.payload.name,
-          actionNavigateTo.payload.params || {},
-          actionNavigateTo.payload.opts || {}
-        );
-        break;
-      case cancelTransitionType:
-        router.cancel();
-        break;
-      case canDeactivateType:
-        const actionСanDeactivate = action as Action<CanDeactivateProps>;
-        router.canDeactivate(
-          actionСanDeactivate.payload.name,
-          actionСanDeactivate.payload.canDeactivate
-        );
-        break;
-      case canActivateType:
-        const actionCanActivate = action as Action<CanActivateProps>;
-        router.canActivate(
-          actionCanActivate.payload.name,
-          actionCanActivate.payload.canActivate
-        );
-        break;
-      default:
-        break;
-    }
   });
-}
+}, atomNaming('transitionStart'));
+
+const transitionSuccessAction = action((ctx, payload: RouterActionProp) => {
+  routerAtom(ctx, {
+    ...ctx.get(routerAtom),
+    route: payload.toState,
+    transitionRoute: undefined,
+    transitionError: undefined,
+    previousRoute: payload.fromState,
+  });
+}, atomNaming('transitionSuccess'));
+
+const transitionErrorAction = action((ctx, payload) => {
+  routerAtom(ctx, {
+    ...ctx.get(routerAtom),
+    transitionRoute: payload.toState,
+    transitionError: payload.err,
+  });
+}, atomNaming('transitionError'));
+
+export const navigateToAction = action<NavigationToProps>(
+  atomNaming('navigateTo'),
+);
+
+export const plugin =
+  (ctx: Ctx): PluginFactory =>
+  (router): Plugin => {
+    ctx.subscribe(navigateToAction, (action) => {
+      const payload = action[0]?.payload;
+      if (payload && router) {
+        router.navigate(payload.name, payload.params || {}, payload.opts || {});
+      }
+    });
+
+    return {
+      onTransitionStart(toState, fromState) {
+        transitionStartAction(ctx, { toState, fromState });
+      },
+      onTransitionSuccess(toState, fromState) {
+        transitionSuccessAction(ctx, { toState, fromState });
+      },
+      onTransitionError(toState, fromState, err) {
+        transitionErrorAction(ctx, { toState, fromState, err });
+      },
+    };
+  };
