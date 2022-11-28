@@ -1,4 +1,5 @@
 import { action, atom, Ctx } from '@reatom/core';
+
 import {
   Plugin,
   State as StateRouter5,
@@ -40,25 +41,31 @@ export const atomNaming = (name: string) => {
   return `${moduleName}.${name}`;
 };
 
-const transitionStartAction = action((ctx, payload: RouterActionProp) => {
-  routerAtom(ctx, {
-    ...ctx.get(routerAtom),
-    transitionRoute: payload.toState,
-    transitionError: undefined,
-  });
-}, atomNaming('transitionStart'));
+export const transitionStartAction = action(
+  (ctx, payload: RouterActionProp) => {
+    routerAtom(ctx, {
+      ...ctx.get(routerAtom),
+      transitionRoute: payload.toState,
+      transitionError: undefined,
+    });
+  },
+  atomNaming('transitionStart'),
+);
 
-const transitionSuccessAction = action((ctx, payload: RouterActionProp) => {
-  routerAtom(ctx, {
-    ...ctx.get(routerAtom),
-    route: payload.toState,
-    transitionRoute: undefined,
-    transitionError: undefined,
-    previousRoute: payload.fromState,
-  });
-}, atomNaming('transitionSuccess'));
+export const transitionSuccessAction = action(
+  (ctx, payload: RouterActionProp) => {
+    routerAtom(ctx, {
+      ...ctx.get(routerAtom),
+      route: payload.toState,
+      transitionRoute: undefined,
+      transitionError: undefined,
+      previousRoute: payload.fromState,
+    });
+  },
+  atomNaming('transitionSuccess'),
+);
 
-const transitionErrorAction = action((ctx, payload) => {
+export const transitionErrorAction = action((ctx, payload) => {
   routerAtom(ctx, {
     ...ctx.get(routerAtom),
     transitionRoute: payload.toState,
